@@ -2,8 +2,11 @@ package com.b355.controller;
 
 import com.b355.model.Credito;
 import com.b355.repository.CreditoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,25 +16,35 @@ import java.util.Optional;
 @RequestMapping("/creditos")
 public class CreditoController {
 
-    private CreditoRepository creditoRepository;
-
     @Autowired
-    public CreditoController(CreditoRepository creditoRepository) {
-        this.creditoRepository = creditoRepository;
-    }
+    private CreditoRepository repository;
+
+    Logger logger = LoggerFactory.getLogger(CreditoController.class);
 
     @GetMapping
-    @ResponseBody
-    public List<Credito> getAllCreditos() {
-        return (List<Credito>) creditoRepository.findAll();
+    public ResponseEntity<List<Credito>> getAll() {
+        try{
+            List<Credito> creditos = repository.findAll();
+            return ResponseEntity.ok(creditos);
+        }catch (IllegalArgumentException e ){
+            logger.info(e.getMessage());
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
     }
 
-    @GetMapping
-    @ResponseBody
-    public Optional<Credito> getOneCredito(@PathVariable("id") Long id) {
-        return (Optional<Credito>) creditoRepository.findById(id);
+    @GetMapping("/{id}")
+    public Optional<Credito> getOne(@PathVariable("id") Long id) {
+        return (Optional<Credito>) repository.findById(id);
     }
 
-    //TODO: adicionar controllers para add de creditos
-
+    @PostMapping
+    public ResponseEntity<String> register(@RequestBody Credito credito){
+        try{
+            repository.save(credito);
+            return new ResponseEntity(HttpStatus.CREATED);
+        }catch (IllegalArgumentException e){
+            logger.info(e.getMessage());
+        }
+        return  new ResponseEntity(HttpStatus.BAD_REQUEST);
+    }
 }
