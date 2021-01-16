@@ -3,34 +3,38 @@ package com.b355.controller;
 import com.b355.model.Debito;
 import com.b355.repository.DebitoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
-@Controller
+@RestController
+@RequestMapping("/debitos")
 public class DebitoController {
 
-    private DebitoRepository debitoRepository;
+    private DebitoRepository repository;
 
     @Autowired
-    public DebitoController(DebitoRepository debitoRepository){
-        this.debitoRepository = debitoRepository;
+    public DebitoController(DebitoRepository repository){
+        this.repository = repository;
     }
 
-    @RequestMapping(value="/debitos", method = RequestMethod.GET)
+    @GetMapping
     @ResponseBody
-    public List<Debito> getAllDebitos(){
-        return (List<Debito>) debitoRepository.findAll();
+    public List<Debito> getAll(){
+        try{
+            //TODO: add dto como model-transfer
+            List<Debito> debitos = (List<Debito>) repository.findAll(); //todo: entender necessidade do cast
+            return debitos;
+        }catch (IllegalArgumentException e ){
+            //TODO: add logger
+        }
     }
 
-    @RequestMapping(value="/debito/{id}",method = RequestMethod.GET)
+    @GetMapping
     @ResponseBody
-    public Optional<Debito> getOneDebito(@PathVariable("id") Long id){
-        return (Optional<Debito>) debitoRepository.findById(id);
+    public Optional<Debito> getOne(@PathVariable("id") Long id){
+        //TODO:add try catch
+        return (Optional<Debito>) repository.findById(id);
     }
 }
